@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>JWT-client-Vue</title>
+
+    <script src="node_modules/vue/dist/vue.min.js"></script>
+    <script src="node_modules/vue-cookie/build/vue-cookie.js"></script>
+    <script src="node_modules/vue-resource/dist/vue-resource.min.js"></script>
+    <script src="node_modules/axios/dist/axios.min.js"></script>
+    <script src="node_modules/vue-cookies/vue-cookies.js"></script>
+
+</head>
+<body>
+    <h1>JWT-client-Vue</h1>
+    <div id="app">
+        <form action="" v-on:submit.prevent="onSubmit">
+            <input type="email" name="email" v-model="email">
+            <input type="password" name="password" v-model="password">
+            <input type="submit" name="submit" value="Login">
+        </form>
+     
+        <br>
+
+        <button v-on:click.prevent="getUsers">get Users</button>
+    </div>
+
+    <script>
+    new Vue({
+        el:"#app",
+        data: {
+            email: '',
+            password:''
+        },
+        methods: {
+            onSubmit: function(){
+            //    mendapatkan login
+            this.$http.post('http://localhost:4000/api/login',
+            {email: this.email, password:this.password }).then(function(res){
+                this.$cookies.set("token", res.data.token);
+                console.log('berhasil dapatkan token' + this.$cookies.get('token'));
+            });
+        },
+        getUsers: function() {
+
+            Vue.http.headers.common['Authorization']= this.$cookies.get('token');    
+
+            this.$http.get('http://localhost:4000/api/users')
+            .then(function(response){   
+                console.log(response);
+            });
+        }
+    }
+});
+
+Vue.http.options.emulateJSON = true;
+
+</script>
+
+</body>
+</html>

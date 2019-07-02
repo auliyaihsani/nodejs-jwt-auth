@@ -42,14 +42,12 @@ router.post('/login', function (req, res) {
                 
                 expiresIn: "24h"
             });
-
             // ngirim balik token  
             res.json({
                 success: 'true',
                 message: 'token berhasil didapatkan!',
                 token: token
             });
-
           }
       }     
        
@@ -58,10 +56,35 @@ router.post('/login', function (req, res) {
 });
 
 
-
 router.get('/', function (req, res) {
     res.send('ini route home');
 });
+
+// protextsi router
+router.use(function (req, res, next) {
+        //ambil token: req.body.token || req.query.token ||
+        var token = req.headers['authorization'];
+
+        if (token) {
+            jwt.verify(token, app.get('secretKey'), function (err, decoded){
+               if(err)
+               return res.json({  success:'false', message:'problem dengan token' });
+               else {
+                    req.decoded = decoded;
+                    next();
+               }
+            });
+
+
+        }else{
+            return res.status(403).send({
+                success: 'false',
+                message: 'token tidak tersedia'
+            });
+        }
+
+})
+
 
 router.get('/users', function (req, res) {
     User.find({}, function(err, users) {
@@ -69,8 +92,6 @@ router.get('/users', function (req, res) {
     })
     
 })
-
-
 
 // prefix
 app.use('/api', router);
